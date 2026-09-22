@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: notification-outbox-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: notification_outbox
+    ports:
+      - "5432:5432"
+    volumes:
+      - notification-outbox-data:/var/lib/postgresql/data
+
+volumes:
+  notification-outbox-data:
