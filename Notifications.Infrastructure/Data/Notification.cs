@@ -1,4 +1,3 @@
-
 namespace Notifications.Infrastructure.Data;
 
 public class Notification
@@ -10,5 +9,5 @@ public class Notification
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     //this is the navigation property one Notification has exactly one outboxmessage.
-    public Outboxmessage? outboxmessage { get; set; }
+    public OutboxMessage? OutboxMessage { get; set; }
 }

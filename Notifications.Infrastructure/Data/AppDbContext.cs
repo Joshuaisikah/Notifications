@@ -8,7 +8,7 @@ public class NotificationsDbContext : DbContext
         : base(options) { }
 
     public DbSet<Notification> Notifications => Set<Notification>();
-    public DbSet<Outboxmessage> Outboxmessages => Set<Outboxmessage>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,12 +19,12 @@ public class NotificationsDbContext : DbContext
             entity.Property(n => n.Message).IsRequired();
             entity.Property(n => n.Channel).IsRequired();
             entity
-                .HasOne(n => n.outboxmessage)
+                .HasOne(n => n.OutboxMessage)
                 .WithOne()
-                .HasForeignKey<Outboxmessage>(o => o.NotificationId)
+                .HasForeignKey<OutboxMessage>(o => o.NotificationId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-        modelBuilder.Entity<Outboxmessage>(entity =>
+        modelBuilder.Entity<OutboxMessage>(entity =>
         {
             entity.HasKey(o => o.Id);
             entity.Property(o => o.Status).HasConversion<string>();
