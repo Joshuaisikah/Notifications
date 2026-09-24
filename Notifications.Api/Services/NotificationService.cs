@@ -14,7 +14,7 @@ public class NotificationService
         _dbcontext = dbcontext;
     }
 
-    public async Task<NotificationServiceResult<Notification>> CreateAsync(
+    public async Task<NotificationServiceResult<NotificationResponse>> CreateAsync(
         CreateNotificationRequest request,
         CancellationToken ct
     )
@@ -32,11 +32,42 @@ public class NotificationService
         };
         notification.OutboxMessage = outboxmessage;
         // IMPORTANT: entities must be explicitly linked (via nav property or FK) before
-        // SaveChangesAsync. Add()-ing two related entities separately does NOT tie them
-        // together on its own — without the line above, this insert would violate the
+        // SaveChangesAsync. Add()-ing two related entities separately does NOT tie them together on its own — without the line above, this insert would violate the
         // OutboxMessage.NotificationId FK constraint (or point at nothing).
         _dbcontext.Notifications.Add(notification);
         await _dbcontext.SaveChangesAsync(ct);
-        return NotificationServiceResult<Notification>.Success(notification);
+        var response = new NotificationResponse(
+            notification.Id,
+            notification.Recipient,
+            notification.Message,
+            notification.Channel,
+            notification.CreatedAt
+        );
+        return NotificationServiceResult<NotificationResponse>.Success(response);
+    }
+
+    public async Task<NotificationServiceResult<NotificationStatusResponse>> GetAsync(
+        Guid id,
+        CancellationToken ct
+    )
+    {
+        var notification = await _dbcontext
+            .Notifications.AsNoTracking()
+            .Include(n => n.OutboxMessage)
+            .FirstOrDefaultAsync(n => n.Id == id, ct);
+        if (notification is null || notification.OutboxMessage is null)
+        {
+            return NotificationServiceResult<NotificationStatusResponse>.Failure(
+                NotificationServiceError.NotFound
+            );
+        }
+        var response = new NotificationStatusResponse(
+            notification.Id,
+            notification.OutboxMessage.Status.ToString(),
+            notification.OutboxMessage.AttemptCount,
+            notification.OutboxMessage.LastError,
+            notification.OutboxMessage.NextRetryAt
+        );
+        return NotificationServiceResult<NotificationStatusResponse>.Success(response);
     }
 }
