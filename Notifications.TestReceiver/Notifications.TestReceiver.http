@@ -1,0 +1,6 @@
+@Notifications.TestReceiver_HostAddress = http://localhost:5100
+
+GET {{Notifications.TestReceiver_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
